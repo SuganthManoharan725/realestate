@@ -14,9 +14,11 @@ require('dotenv').config();
 
 const app = express();
 const port = 5500;
+const localhostUrl = process.env.LOCAL_HOST;
+const mongoUri = process.env.MONGODB_URI;
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/real_estate', {
+mongoose.connect(mongoUri , {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => console.log('Connected to MongoDB'))
@@ -231,5 +233,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+  console.log(`Server running on ${localhostUrl}`);
 });
