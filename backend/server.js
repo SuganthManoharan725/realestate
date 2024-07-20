@@ -161,7 +161,7 @@ app.post('/admin/upload', (req, res) => {
 
     try {
       await property.save();
-      res.redirect('/admin'); // Redirect to admin dashboard after successful upload
+      res.redirect('/'); // Redirect to admin dashboard after successful upload
     } catch (err) {
       console.error('Error saving property:', err);
       res.status(500).send('Error saving property');
