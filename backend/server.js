@@ -58,6 +58,21 @@ app.use((req, res, next) => {
   next();
 });
 
+//restart server automatically
+
+app.use((req, res, next) => {
+  const now = new Date();
+  const hour = now.getUTCHours();
+  const minute = now.getUTCMinutes();
+
+  // Check if it's the maintenance window (2:30 AM UTC)
+  if (hour === 2 && minute === 30) {
+      return res.status(503).send('<h1>Website maintenance is ongoing. Please try again later.</h1>');
+  }
+
+  // If not in maintenance window, proceed to next middleware/route
+  next();
+});
 
 
 const storage = multer.diskStorage({
@@ -68,6 +83,7 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + '-' + file.originalname);
   }
 });
+
 
 const upload = multer({
   storage: storage,
@@ -128,41 +144,32 @@ app.post('/admin/login', (req, res, next) => {
  
 // Route to handle file uploads and data
 app.post('/admin/upload', (req, res) => {
-  // Handle the file upload
   upload(req, res, async (err) => {
-    if (err instanceof multer.MulterError) {
-      // A Multer error occurred (e.g., file size limit exceeded)
-      if (err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).send('File must be an image and should be less than 80KB');
-      }
-      return res.status(500).send('Error uploading file');
-    } else if (err) {
-      // An unknown error occurred
+    if (err) {
       console.error('Error uploading file:', err);
       return res.status(500).send('Error uploading file');
     }
 
-    // If no file was uploaded or size limit exceeded
     if (!req.file) {
       return res.status(400).send('No file uploaded');
     }
 
-    // Proceed with saving the property details if upload is successful
     const { title, description, rate, sqft, beds, baths, rating, booking } = req.body;
-    const image_path = req.file.filename;
-    const status = 'available';
+    const image_path = req.file.filename; // Save filename (or full path as needed) to MongoDB
 
-    const property = new Property({ title, description, rate, image_path, status, sqft, beds, baths, rating, booking});
+    const property = new Property({ title, description, rate, image_path, sqft, beds, baths, rating, booking });
 
     try {
       await property.save();
-      res.redirect('/'); // Redirect to index.html after successful upload
+      res.redirect('/admin'); // Redirect to admin dashboard after successful upload
     } catch (err) {
       console.error('Error saving property:', err);
       res.status(500).send('Error saving property');
     }
   });
 });
+
+
 
 
 // Route to handle PUT request for updating a property
@@ -184,6 +191,8 @@ app.put('/admin/update/:id', async (req, res) => {
   }
 });
 
+
+
 // Route to handle DELETE request for deleting a property
 app.delete('/admin/delete/:id', async (req, res) => {
   try {
@@ -197,34 +206,30 @@ app.delete('/admin/delete/:id', async (req, res) => {
     if (imagePath) {
       const filePath = path.join(__dirname, 'uploads', imagePath);
 
-      fs.unlink(filePath, async (err) => {
-        if (err) {
-          console.error('Error deleting image file:', err);
-          return res.status(500).send('Error deleting property and image');
-        }
-
-        try {
-          await Property.findByIdAndDelete(req.params.id);
-          res.send('Property deleted successfully');
-        } catch (err) {
-          console.error('Error deleting property:', err);
-          res.status(500).send('Error deleting property');
-        }
-      });
-    } else {
       try {
-        await Property.findByIdAndDelete(req.params.id);
-        res.send('Property deleted successfully');
+        await fs.promises.unlink(filePath); // Delete image file from 'uploads' directory
       } catch (err) {
-        console.error('Error deleting property:', err);
-        res.status(500).send('Error deleting property');
+        if (err.code === 'ENOENT') {
+          console.error('File not found:', err.path);
+        } else {
+          console.error('Error deleting image file:', err);
+          return res.status(500).send('Error deleting image file');
+        }
       }
     }
+
+    await Property.findByIdAndDelete(req.params.id); // Delete property from MongoDB
+    res.send('Property deleted successfully');
   } catch (err) {
-    console.error('Error finding property:', err);
+    console.error('Error deleting property:', err);
     res.status(500).send('Error deleting property');
   }
 });
+
+
+
+
+
 
 // Error handling middleware
 app.use((err, req, res, next) => {

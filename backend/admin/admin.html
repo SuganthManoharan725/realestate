@@ -88,9 +88,8 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-        
 
+    <script>        
         async function fetchProperties() {
             try {
                 const response = await fetch('/properties');
@@ -125,19 +124,26 @@
         }
 
         async function deleteProperty(id) {
-            try {
-                const response = await fetch(`/admin/delete/${id}`, {
-                    method: 'DELETE'
-                });
-                if (response.ok) {
-                    document.getElementById(`propertyRow_${id}`).remove();
-                } else {
-                    alert('Error deleting property');
-                }
-            } catch (error) {
-                console.error('Error deleting property:', error.message);
-            }
-        }
+  try {
+    const response = await fetch(`/admin/delete/${id}`, {
+      method: 'DELETE'
+    });
+    if (response.ok) {
+      const result = await response.text();
+      if (result === 'Property deleted successfully') {
+        document.getElementById(`propertyRow_${id}`).remove(); // Remove deleted property from UI
+      } else {
+        alert('Error deleting property');
+      }
+    } else {
+      alert('Error deleting property');
+    }
+  } catch (error) {
+    console.error('Error deleting property:', error.message);
+    alert('Error deleting property');
+  }
+}
+
 
         function editProperty(id) {
             // Hide current span elements and show input fields for editing
