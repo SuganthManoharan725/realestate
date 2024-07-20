@@ -8,11 +8,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
 <body>
+ 
   <img class="wave" src="img/wave.png" />
   <div class="container">
     <div class="img"></div>
     <div class="login-content">
-      <form id="loginForm" action="${localhostUrl}/admin/login" method="POST">
+      <form id="loginForm" action=""  method="POST">
         <img src="img/avatar.svg" class="avatarpic" />
         <br><br>
         <div class="input-div one">
@@ -39,5 +40,10 @@
   </div>
   <script  src="./js/main.js"></script>
   <script src="./js/login.js"></script>
+  <script>
+    const localhostUrl = process.env.LOCAL_HOST;
+// Set the action attribute of the form
+document.getElementById('loginForm').action = `${localhostUrl}/admin/login`;
+  </script>
 </body>
 </html>
