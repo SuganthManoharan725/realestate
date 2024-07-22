@@ -35,7 +35,7 @@ app.use(session({
   secret: sessionSecret,
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: true }
+  cookie: { secure: false }
 }));
 
 // Initialize Passport and session middleware
