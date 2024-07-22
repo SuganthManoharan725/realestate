@@ -18,7 +18,7 @@ async function fetchProperties() {
                 <li>
                     <div class="property-card ${property.booking === 'soldout' ? 'dimmed' : ''}">
                         <figure class="card-banner">
-                            <img src="/uploads/${property.image_path}" width="800" height="533" loading="lazy" alt="${property.title}" class="img-cover">
+                            <img src="https://realestate-1-c2rw.onrender.com/uploads/${property.image_path}" width="800" height="533" loading="lazy" alt="${property.title}" class="img-cover">
                         </figure>
                         <button class="card-action-btn" aria-label="add to favourite">
                             <ion-icon name="heart" aria-hidden="true"></ion-icon>
