@@ -47,7 +47,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // Static file middleware
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  maxAge: 0,  // Disable caching
+  etag: false,  // Disable ETag
+  lastModified: false,  // Disable Last-Modified
+  setHeaders: (res, filePath) => {
+    // Set cache-control headers
+    res.setHeader('Cache-Control', 'no-store');  // Prevent caching
+  }
+}));
 app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/admin/login', express.static(path.join(__dirname, '..', 'public', 'adminLogin')));
 
